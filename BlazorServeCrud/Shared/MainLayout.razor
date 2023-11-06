@@ -1,0 +1,48 @@
+﻿@inherits LayoutComponentBase
+@using Blazored.SessionStorage
+@inject NavigationManager nav
+@inject ISessionStorageService sessionStorage
+<PageTitle>BlazorServeCrud</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu UserEmail="@userName" />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <span>Welcome to  &nbsp;</span> <span style="color:brown; font-size:16px;"> @userName</span>
+            &nbsp;
+            <a href="#" @onclick="Logout">Logout</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+@code {
+    private string userName= string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        // Get the session value for "UserName"
+        //var result = await ProtectedSessionStore.GetAsync<string>("UserName");
+        
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            userName = await sessionStorage.GetItemAsStringAsync("UserName");
+
+            StateHasChanged();
+        }
+    }
+    private async Task Logout()
+    {
+        //userName = null;
+        await sessionStorage.RemoveItemAsync("UserName");
+        nav.NavigateTo("/");
+    }
+}

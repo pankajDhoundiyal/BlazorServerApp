@@ -1,0 +1,80 @@
+﻿@page "/task/add"
+@page "/task/edit/{taskId:int}"
+@using BlazorServeCrud.Models;
+@using Services;
+@inject IUserService userService;
+@inject ITaskService taskService;
+@inject NavigationManager _nav
+<h3>@Title</h3>
+
+<RadzenTemplateForm Data="@task" Submit="@((DTask args) => { Submit(args); })">
+    <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="Task Detail">
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Name" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Tasks" @bind-Value=@task.Tasks class="w-100" />
+                                <RadzenRequiredValidator Component="Tasks" Text="Task name is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Description" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Description" @bind-Value=@task.Description class="w-100" />
+                                <RadzenRequiredValidator Component="Description" Text="Task Description is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Assigned To" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenDropDown TValue="int" @bind-Value=@task.UserId Data=@users TextProperty="Email" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+    </RadzenStack>
+</RadzenTemplateForm>
+@code {
+    [Parameter]
+    public int TaskId { get; set; }
+    int value;
+    private string Title = "Add Task";
+    bool popup;
+    private DTask task = new();
+    private List<User> users = new();
+    async Task Submit(DTask arg)
+    {
+        var result = await taskService.AddUpdateTaskAsync(arg);
+        if (result)
+        {
+            _nav.NavigateTo("admin/tasks");
+        }
+    }
+    void Cancel()
+    {
+        _nav.NavigateTo("admin/tasks");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if(TaskId > 0) {
+            Title = "Edit Task";
+            task = await taskService.GetTaskByIdAsync(TaskId);
+        }
+        users = await userService.GetAllAsync();
+    }
+}

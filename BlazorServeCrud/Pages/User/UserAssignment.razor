@@ -1,0 +1,69 @@
+﻿@page "/usertask"
+@using Services
+@using BlazorServeCrud.Models;
+@using Blazored.SessionStorage
+@using BlazorServeCrud.Enum
+@inject ITaskService taskService;
+@inject ISessionStorageService sessionStorage
+<h3>UserAssignment</h3>
+@if (tasks is null)
+{
+    <p><em>Loading... !</em></p>
+}
+else
+{
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced"
+                AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
+                ShowPagingSummary="true" Data="@tasks" TItem="DTask" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="DTask" Property="Tasks" Title="Task" Frozen="true" Width="160px" />
+            <RadzenDataGridColumn TItem="DTask" Property="Description" Title="Description" Width="260px" />
+            <RadzenDataGridColumn TItem="DTask" Title="Status" Width="120px">
+                <Template Context="context">
+                    @if (context.TaskStatus == DTaskStatus.Active)
+                    {
+                        <span>Active</span>
+                    }
+                    else if(context.TaskStatus == DTaskStatus.InProgress)
+                    {
+                        <span>InProgress</span>
+                    }
+                    else if (context.TaskStatus == DTaskStatus.Pending)
+                    {
+                        <span>Pending</span>
+                    }
+                    else if (context.TaskStatus == DTaskStatus.Completed)
+                    {
+                        <span>Completed</span>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="DTask" Title="Action" Width="120px">
+                <Template Context="context">
+                    <a href="edit/assignment/@context.Id">
+                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                    </a>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+@code {
+    private string userName;
+    private List<DTask> tasks = new();
+    protected override async Task OnInitializedAsync()
+    {
+        
+        //base.OnInitializedAsync();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            userName = await sessionStorage.GetItemAsync<string>("UserName");
+            tasks = await taskService.GetUsersTaskAsync(userName);
+
+            StateHasChanged();
+        }
+    }
+}

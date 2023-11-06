@@ -1,0 +1,58 @@
+﻿@page "/admin/users"
+@using Services
+@inject IJSRuntime jsRuntime
+@inject IUserService userService
+@using BlazorServeCrud.Models;
+<h3>Users</h3>
+<a href="/user/add" class="btn btn-outline-dark my-2">Add User</a>
+
+@if(users is null)
+{
+    <p><em>Loading... !</em></p>
+}
+else
+{
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced"
+                AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
+                ShowPagingSummary="true" Data="@users" TItem="User" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="User" Property="FirstName" Title="First Name" Frozen="true" Width="160px" />
+            <RadzenDataGridColumn TItem="User" Property="LastName" Title="Last Name" Width="160px" />
+            <RadzenDataGridColumn TItem="User" Property="Email" Title="Email" Width="200px" />
+            <RadzenDataGridColumn TItem="User" Property="Address" Title="Address" Width="120px" />
+            <RadzenDataGridColumn TItem="User" Property="PhoneNo" Title="PhoneNo" Width="160px" />
+            <RadzenDataGridColumn TItem="User" Property="Role" Title="Role" Width="160px" />
+            <RadzenDataGridColumn TItem="User" Title="Action">
+                <Template Context="context">
+                    <a href="user/edit/@context.Id">
+                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                    </a>
+                    <a @onclick="() => Delete(context)">
+                        <span class="oi oi-trash" aria-hidden="true"></span>
+                    </a>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+
+@code {
+    private List<User> users= new();
+    protected override async Task OnInitializedAsync()
+    {
+        users = await userService.GetAllAsync();
+        //base.OnInitializedAsync();
+    }
+    private async Task Delete(User user)
+    {
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure????");
+        if (confirmed)
+        {
+            if (await userService.DeleteAsync(user.Id))
+            {
+                users = await userService.GetAllAsync();
+            }
+        }
+    }
+}

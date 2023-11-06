@@ -1,0 +1,93 @@
+﻿@page "/persons"
+@using BlazorServeCrud.Models;
+@using Radzen;
+@using Services
+@inject IPersonService personService
+@inject IJSRuntime jsRuntime
+@using Radzen.Blazor
+@attribute [Authorize]
+<h3>Persons</h3>
+
+<a href="/person/add" class="btn btn-outline-dark my-2">Add Person</a>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var person in persons)
+                {
+                    <tr>
+                        <td>@person.Name</td>
+                        <td>@person.Email</td>
+                        <td>
+                            <a href="/person/edit/@person.Id" class="btn btn-success">Edit</a>
+                            @*<a class="btn btn-danger" @onclick="async ()=> await Delete(person)">Delete</a>*@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@if (persons is null)
+{
+    <p><em>Loading... !</em></p>
+}
+else
+{
+
+    <RadzenGrid Data="@persons" PageSize="10" AllowPaging="true" AllowSorting="true" FilterMode="FilterMode.Simple"
+            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterText="@searchText">
+        <Columns>
+            <RadzenGridColumn TItem="Person" Property="Name" Title="Name" Sortable="true" />
+            <RadzenGridColumn TItem="Person" Property="Email" Title="Email" Sortable="true" />
+
+            <RadzenGridColumn TItem="Person" Title="Action">
+                <Template Context="context">
+                    <a class="btn btn-primary btn-sm nav-link" href="EditUsers/@context.Id">
+                        <span class="oi oi-pencil" aria-hidden="true">Edit</span>
+                    </a>
+                    @*<a class="btn btn-danger btn-sm nav-link" @onclick="() => Delete(context)">
+                        <span class="oi oi-trash" aria-hidden="true"></span>
+                    </a>*@
+                </Template>
+            </RadzenGridColumn>
+        </Columns>
+    </RadzenGrid>
+    @if (showLoader)
+    {
+        <div class="loader-overlay">
+            <div class="loader"></div>
+        </div>
+    }
+}
+
+
+@code {
+    private string searchText = "";
+    private bool showLoader = false;
+    private List<Models.Person> persons = new();
+    //private async Task Delete(Person person)
+    //{
+    //    bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure????");
+    //    if(confirmed)
+    //    {
+    //       if(personService.Delete(person.Id)) {
+    //            persons.Remove(person);
+    //        }            
+    //    }
+    //}
+    protected override void OnInitialized()
+    {
+        persons = personService.GetAll();
+        base.OnInitialized();
+    }
+}

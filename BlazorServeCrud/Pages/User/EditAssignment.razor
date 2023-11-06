@@ -1,0 +1,121 @@
+﻿@page "/edit/assignment/{taskId:int}"
+@using BlazorServeCrud.Models;
+@using BlazorServeCrud.Enum
+@using Services;
+@using Microsoft.AspNetCore.Mvc.Rendering
+@inject IUserService userService;
+@inject ITaskService taskService;
+@inject NavigationManager _nav
+<h3>@Title</h3>
+
+<RadzenTemplateForm Data="@task" Submit="@((DTask args) => { Submit(args); })">
+    <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="Task Detail">
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Name" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Tasks" @bind-Value=@task.Tasks class="w-100" />
+                                <RadzenRequiredValidator Component="Tasks" Text="Task name is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Description" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Description" @bind-Value=@task.Description class="w-100" />
+                                <RadzenRequiredValidator Component="Description" Text="Task Description is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Status" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenDropDown @bind-Value=@task.TaskStatusId Data=@dTaskStatuses TextProperty="Text" ValueProperty="Value" Style="width: 100%; max-width: 400px;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Add comment" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox @bind-Value=@task.Comment />
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="Comments">
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            @foreach (var comment in task.TaskComment)
+                            {
+                                <RadzenColumn Size="12" SizeMD="8">
+                                    <RadzenTextBox @bind-Value=comment.Comment ReadOnly style="display: block" Name="Tasks" class="w-100" />
+                                </RadzenColumn>
+                            }
+                        </RadzenRow>
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+
+
+@code {
+    
+    [Parameter]
+    public int TaskId { get; set; }
+    int value;
+    private string Title = "Edit Assignment";
+    bool popup;
+    private DTask task = new();
+    private List<User> users = new();
+    protected IEnumerable<StatusItem> dTaskStatuses = Enum.GetValues(typeof(DTaskStatus)).Cast<DTaskStatus>()
+    .Select(t => new StatusItem { Text = $"{t}", Value = (int)t }).ToList();
+    protected DTaskStatus SelectedTaskStatuses = DTaskStatus.Active;
+    async Task Submit(DTask arg)
+    {
+        var result = await taskService.AddUpdateUserTaskAsync(arg);
+        if (result)
+        {
+            _nav.NavigateTo("usertask");
+        }
+    }
+    void Cancel()
+    {
+        _nav.NavigateTo("usertask");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (TaskId > 0)
+        {
+            Title = "Edit Task";
+            task = await taskService.GetTaskByIdAsync(TaskId);
+        }
+        users = await userService.GetAllAsync();
+    }
+    public class StatusItem
+    {
+        public string Text { get; set; }
+        public int Value { get; set; }
+    }
+
+}

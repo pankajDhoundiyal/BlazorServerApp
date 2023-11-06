@@ -1,0 +1,61 @@
+﻿@layout LoginLayout
+@page "/"
+@attribute [AllowAnonymous]
+@using Services
+@using Blazored.SessionStorage
+@inject IUserService userService
+@inject NavigationManager _nav
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ISessionStorageService _sessionStorage
+<PageTitle>Login</PageTitle>
+<h3>Login</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="@user" OnValidSubmit="login">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="Email">Email</label>
+                <InputText class="form-control" @bind-Value="user.Email" />
+                <ValidationMessage For="@(()=>user.Email)" />
+            </div>
+            <div class="form-group">
+                <label for="Email">Password</label>
+                <InputText type="password" class="form-control" @bind-Value="user.Password" />
+                <ValidationMessage For="@(()=>user.Password)" />
+            </div>
+            <div class="my-2">
+                @message
+            </div>
+            <div class="my-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="/register" class="btn btn-outline-dark">Register</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    
+    Models.LoginUser user = new();
+    private string message = string.Empty;
+    private async Task login()
+    {
+        var result = await userService.LoginAsync(user);
+        if (result!=null)
+        {
+            await _sessionStorage.SetItemAsync<string>("UserName", user.Email);
+            //_state.email = user.Email;
+            if(result.Role==BlazorServeCrud.Enum.Role.Admin)
+                _nav.NavigateTo("admin/users");
+            else if(result.Role==BlazorServeCrud.Enum.Role.User)
+                _nav.NavigateTo("usertask");
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        
+        //base.OnInitialized();
+    }
+}
