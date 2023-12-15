@@ -1,5 +1,6 @@
 ﻿@layout LoginLayout
 @page "/"
+@page "/login"
 @attribute [AllowAnonymous]
 @using Services
 @using Blazored.SessionStorage
@@ -8,9 +9,13 @@
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 @inject ISessionStorageService _sessionStorage
+@inject IToastService toastService
 <PageTitle>Login</PageTitle>
 <h3>Login</h3>
-
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
 <div class="row">
     <div class="col-md-6">
         <EditForm Model="@user" OnValidSubmit="login">
@@ -30,22 +35,26 @@
             </div>
             <div class="my-2">
                 <button type="submit" class="btn btn-primary">Login</button>
-                <a href="/register" class="btn btn-outline-dark">Register</a>
+                @* <a href="/register" class="btn btn-outline-dark">Register</a> *@
             </div>
         </EditForm>
     </div>
 </div>
 
 @code {
-    
+    private bool loader;
     Models.LoginUser user = new();
     private string message = string.Empty;
     private async Task login()
     {
+        toastService.ShowSuccess("This is Success message with title");
+        loader = true;
         var result = await userService.LoginAsync(user);
         if (result!=null)
         {
+            loader = false;
             await _sessionStorage.SetItemAsync<string>("UserName", user.Email);
+            await _sessionStorage.SetItemAsync<string>("UserNameH", result.FirstName+" "+result.LastName);
             //_state.email = user.Email;
             if(result.Role==BlazorServeCrud.Enum.Role.Admin)
                 _nav.NavigateTo("admin/users");
@@ -55,7 +64,7 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        
+        toastService.ShowSuccess("This is Success message with title");
         //base.OnInitialized();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlazorServeCrud.Models
 {
@@ -10,8 +11,9 @@ namespace BlazorServeCrud.Models
         public int TaskId { get; set; }
         [ForeignKey("User")]
         public int UserId { get; set; }
-        public DTask Task { get; set; } 
-        
+        [DeleteBehavior(DeleteBehavior.Restrict)]
+        public DTask Task { get; set; }
+        [DeleteBehavior(DeleteBehavior.Restrict)]
         public User User { get; set; }
     }
 }

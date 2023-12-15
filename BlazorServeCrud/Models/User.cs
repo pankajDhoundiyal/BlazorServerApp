@@ -22,6 +22,11 @@ namespace BlazorServeCrud.Models
         [Required]
         public string? PhoneNo { get; set; }
         public Role Role { get; set; }
+        [NotMapped]
+        public int RoleId { get; set; }
+        public int ExpertCategoryId { get; set; }
+        [NotMapped]
+        public string ExpertFulllName => $"{FirstName} {LastName} - {(ExpertCategory)ExpertCategoryId}";
         public ICollection<DTask> Task { get; } = new List<DTask>();
     }
     public class LoginUser

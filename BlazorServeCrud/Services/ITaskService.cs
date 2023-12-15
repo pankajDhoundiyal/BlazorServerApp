@@ -1,4 +1,5 @@
 ﻿using BlazorServeCrud.Models;
+using System.Text;
 
 namespace BlazorServeCrud.Services
 {
@@ -10,5 +11,6 @@ namespace BlazorServeCrud.Services
         Task<DTask> GetTaskByIdAsync(int id);
         Task<List<DTask>> GetUsersTaskAsync(string username);
         Task<bool> DeleteTaskAsync(int id);
+        Task<bool> SendEmail(string subject, StringBuilder Body, List<string> To, List<string> Cc, List<string> Bcc);
     }
 }

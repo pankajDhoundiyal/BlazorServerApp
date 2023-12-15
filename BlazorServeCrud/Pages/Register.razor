@@ -9,6 +9,10 @@
 
 <PageTitle>Register User</PageTitle>
 <h3>Register User</h3>
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
 <div class="row">
     <div class="col-md-6">
         <EditForm Model="@user" OnValidSubmit="register">
@@ -55,16 +59,19 @@
 </div>
 
 @code {
+    private bool loader;
     Models.User user = new();
     private string message = string.Empty;
     private async Task register()
     {
+        loader = true;
         var result = await userService.RegisterUserAsync(user);
         if (result)
         {
+            loader = false;
             await ProtectedSessionStore.SetAsync("User", user.Email);
             //_state.email = user.Email;
-            //_nav.NavigateTo("users");
+            _nav.NavigateTo("login");
         }
         else
         {

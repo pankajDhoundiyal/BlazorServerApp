@@ -21,8 +21,8 @@ else
             <RadzenDataGridColumn TItem="User" Property="Email" Title="Email" Width="200px" />
             <RadzenDataGridColumn TItem="User" Property="Address" Title="Address" Width="120px" />
             <RadzenDataGridColumn TItem="User" Property="PhoneNo" Title="PhoneNo" Width="160px" />
-            <RadzenDataGridColumn TItem="User" Property="Role" Title="Role" Width="160px" />
-            <RadzenDataGridColumn TItem="User" Title="Action">
+            <RadzenDataGridColumn TItem="User" Property="Role" Title="Role" Width="120px" />
+            <RadzenDataGridColumn TItem="User" Title="Action" Width="160px">
                 <Template Context="context">
                     <a href="user/edit/@context.Id">
                         <span class="oi oi-pencil" aria-hidden="true"></span>
@@ -46,7 +46,7 @@ else
     }
     private async Task Delete(User user)
     {
-        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure????");
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure to delete the user????");
         if (confirmed)
         {
             if (await userService.DeleteAsync(user.Id))

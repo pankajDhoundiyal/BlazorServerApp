@@ -8,6 +8,10 @@
 @inject NavigationManager _nav
 <h3>@Title</h3>
 
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
 <RadzenTemplateForm Data="@task" Submit="@((DTask args) => { Submit(args); })">
     <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
         <RadzenColumn Size="12" SizeMD="6">
@@ -19,7 +23,7 @@
                                 <RadzenLabel Text="Task Name" />
                             </RadzenColumn>
                             <RadzenColumn Size="12" SizeMD="8">
-                                <RadzenTextBox style="display: block" Name="Tasks" @bind-Value=@task.Tasks class="w-100" />
+                                <RadzenTextBox style="display: block" Name="Tasks" @bind-Value=@task.Tasks class="w-100" Disabled />
                                 <RadzenRequiredValidator Component="Tasks" Text="Task name is required" Popup=@popup Style="position: absolute" />
                             </RadzenColumn>
                         </RadzenRow>
@@ -28,8 +32,17 @@
                                 <RadzenLabel Text="Task Description" />
                             </RadzenColumn>
                             <RadzenColumn Size="12" SizeMD="8">
-                                <RadzenTextBox style="display: block" Name="Description" @bind-Value=@task.Description class="w-100" />
+                                <RadzenTextBox style="display: block" Name="Description" @bind-Value=@task.Description class="w-100" Disabled />
                                 <RadzenRequiredValidator Component="Description" Text="Task Description is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task DueDate" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenDatePicker style="display: block" Name="DueDate" @bind-Value=@task.DueDate DateFormat="MM/dd/yyyy" class="w-100" Disabled />
+                                <RadzenRequiredValidator Component="DueDate" Text="Task Due is required" Popup=@popup Style="position: absolute" />
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center">
@@ -41,20 +54,29 @@
                             </RadzenColumn>
                         </RadzenRow>
 
-                        <RadzenRow AlignItems="AlignItems.Center">
+                        @* <RadzenRow AlignItems="AlignItems.Center">
                             <RadzenColumn Size="12" SizeMD="4">
                                 <RadzenLabel Text="Add comment" />
                             </RadzenColumn>
                             <RadzenColumn Size="12" SizeMD="8">
-                                <RadzenTextBox @bind-Value=@task.Comment />
+                                 <RadzenTextBox @bind-Value=@task.Comment class="w-100" />
                             </RadzenColumn>
-                        </RadzenRow>
+                        </RadzenRow> *@
+
+                         <RadzenRow AlignItems="AlignItems.Center">
+                             <RadzenColumn Size="12" SizeMD="4">
+                                 <RadzenLabel Text="Add Remarks" />
+                             </RadzenColumn>
+                             <RadzenColumn Size="12" SizeMD="8">
+                                 <RadzenTextBox @bind-Value=@task.Remarks class="w-100" />
+                             </RadzenColumn>
+                         </RadzenRow>
 
                     </RadzenStack>
                 </RadzenFieldset>
             </RadzenStack>
         </RadzenColumn>
-        <RadzenColumn Size="12" SizeMD="6">
+       @*  <RadzenColumn Size="12" SizeMD="6">
             <RadzenStack>
                 <RadzenFieldset Text="Comments">
                     <RadzenStack Gap="1rem">
@@ -69,6 +91,55 @@
                     </RadzenStack>
                 </RadzenFieldset>
             </RadzenStack>
+        </RadzenColumn> *@
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="Task Detail">
+                    <RadzenStack Gap="1rem">
+                         <RadzenRow AlignItems="AlignItems.Center">
+                             <RadzenColumn Size="12" SizeMD="4">
+                                 <RadzenLabel Text="Agree with the DueDate" />
+                             </RadzenColumn>
+                             <RadzenColumn Size="12" SizeMD="8">
+                                 <RadzenCheckBox style="display: block" Name="AgreeWithDueDate" @bind-Value=@task.IsAgreeWithDueDate />
+                                 @* <RadzenRequiredValidator Component="DueDate" Text="Task Due is required" Popup=@popup Style="position: absolute" /> *@
+                             </RadzenColumn>
+                         </RadzenRow>
+                         @if (!task.IsAgreeWithDueDate)
+                        {
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="4">
+                                    <RadzenLabel Text="Reason" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="8">
+                                    <RadzenTextBox style="display: block" Name="Reason" @bind-Value=@task.Reason class="w-100" />
+                                    <RadzenRequiredValidator Component="Reason" Text="Reason is required" Popup=@popup Style="position: absolute" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        }
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Want Expert Help" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenCheckBox style="display: block" Name="ExpertHelpRequired" @bind-Value=@task.IsExpertHelpRequired />
+                                @* <RadzenRequiredValidator Component="DueDate" Text="Task Due is required" Popup=@popup Style="position: absolute" /> *@
+                            </RadzenColumn>
+                        </RadzenRow>
+                        @if(task.IsExpertHelpRequired)
+                        {
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="4">
+                                    <RadzenLabel Text="Experts" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="8">
+                                    <RadzenDropDown @bind-Value=@task.ExpertId Data=@experts TextProperty="ExpertFulllName" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        }
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenStack>
         </RadzenColumn>
     </RadzenRow>
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
@@ -80,7 +151,7 @@
 
 
 @code {
-    
+    private bool loader;
     [Parameter]
     public int TaskId { get; set; }
     int value;
@@ -88,14 +159,17 @@
     bool popup;
     private DTask task = new();
     private List<User> users = new();
+    private List<User> experts = new();
     protected IEnumerable<StatusItem> dTaskStatuses = Enum.GetValues(typeof(DTaskStatus)).Cast<DTaskStatus>()
     .Select(t => new StatusItem { Text = $"{t}", Value = (int)t }).ToList();
     protected DTaskStatus SelectedTaskStatuses = DTaskStatus.Active;
     async Task Submit(DTask arg)
     {
+        loader = true;
         var result = await taskService.AddUpdateUserTaskAsync(arg);
         if (result)
         {
+            loader = false;
             _nav.NavigateTo("usertask");
         }
     }
@@ -111,6 +185,7 @@
             task = await taskService.GetTaskByIdAsync(TaskId);
         }
         users = await userService.GetAllAsync();
+        experts = await userService.GetAllExpertsAsync();
     }
     public class StatusItem
     {

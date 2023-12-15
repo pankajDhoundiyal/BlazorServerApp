@@ -7,6 +7,10 @@
 @inject NavigationManager _nav
 <h3>@Title</h3>
 
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
 <RadzenTemplateForm Data="@task" Submit="@((DTask args) => { Submit(args); })">
     <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
         <RadzenColumn Size="12" SizeMD="6">
@@ -33,10 +37,27 @@
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center">
                             <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Task Due Date" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenDatePicker Name="DueDate" @bind-Value=@task.DueDate DateFormat="MM/dd/yyyy" class="w-100" />
+                                <RadzenRequiredValidator Component="DueDate" Text="Task Due Date is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
                                 <RadzenLabel Text="Task Assigned To" />
                             </RadzenColumn>
                             <RadzenColumn Size="12" SizeMD="8">
                                 <RadzenDropDown TValue="int" @bind-Value=@task.UserId Data=@users TextProperty="Email" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Add Remarks" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox @bind-Value=@task.Remarks class="w-100" Disabled />
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenStack>
@@ -50,6 +71,7 @@
     </RadzenStack>
 </RadzenTemplateForm>
 @code {
+    private bool loader;
     [Parameter]
     public int TaskId { get; set; }
     int value;
@@ -59,9 +81,11 @@
     private List<User> users = new();
     async Task Submit(DTask arg)
     {
+        loader = true;
         var result = await taskService.AddUpdateTaskAsync(arg);
         if (result)
         {
+            loader = false;
             _nav.NavigateTo("admin/tasks");
         }
     }

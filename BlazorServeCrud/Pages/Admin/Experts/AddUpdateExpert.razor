@@ -1,0 +1,75 @@
+﻿@page "/admin/expert/add"
+@page "/admin/expert/edit/{expertId:int}"
+@using BlazorServeCrud.Models
+@inject NavigationManager _nav
+<h3>@Title</h3>
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
+<RadzenTemplateForm Data="@expert" Submit="@((ServerExpert args) => { Submit(args); })">
+    <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="Task Detail">
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Name" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Name" @bind-Value=@expert.Name class="w-100" />
+                                <RadzenRequiredValidator Component="Name" Text="Expert name is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Email" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Email" @bind-Value=@expert.Email class="w-100" />
+                                <RadzenRequiredValidator Component="Email" Text="Expert email is required" Popup=@popup Style="position: absolute" />
+                                <RadzenEmailValidator Component="Email" Text="Provide a valid email address" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Phoneno" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="PhoneNo" @bind-Value=@expert.PhoneNo class="w-100" />
+                                <RadzenRequiredValidator Component="PhoneNo" Text="PhoneNo is required" Popup=@popup Style="position: absolute" />
+                             </RadzenColumn>
+                         </RadzenRow>
+                     </RadzenStack>
+                 </RadzenFieldset>
+             </RadzenStack>
+         </RadzenColumn>
+     </RadzenRow>
+     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+         <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+         <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+     </RadzenStack>
+ </RadzenTemplateForm>
+@code {
+    private bool loader;
+    [Parameter]
+    public int ExpertId { get; set; }
+    private string Title = "Add Expert";
+    bool popup;
+    private ServerExpert expert = new();
+    async Task Submit(ServerExpert arg)
+    {
+        // loader = true;
+         //var result = await taskService.AddUpdateTaskAsync(arg);
+        // if (result)
+        // {
+        //     loader = false;
+        //     _nav.NavigateTo("admin/tasks");
+        // }
+    }
+    void Cancel()
+    {
+        _nav.NavigateTo("admin/experts");
+    }
+}

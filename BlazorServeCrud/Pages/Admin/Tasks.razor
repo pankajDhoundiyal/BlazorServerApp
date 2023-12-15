@@ -6,6 +6,30 @@
 @inject IJSRuntime jsRuntime
 <h3>Tasks</h3>
 <a href="/task/add" class="btn btn-outline-dark my-2">Add Task</a>
+<style>
+    .tag {
+        width: auto;
+        display: block;
+        background: #ddd;
+        padding: 3px;
+        border-radius: 3px;
+        border: 1px solid;
+        text-align: center;
+        max-width: 150px;
+
+        &.red-tag{
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        }
+
+        &.green-tag {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+    }
+</style>
 @if (tasks is null)
 {
     <p><em>Loading... !</em></p>
@@ -17,7 +41,12 @@ else
                 ShowPagingSummary="true" Data="@tasks" TItem="DTask" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
             <RadzenDataGridColumn TItem="DTask" Property="Tasks" Title="Task" Frozen="true" Width="160px" />
-            <RadzenDataGridColumn TItem="DTask" Property="Description" Title="Description" Width="260px" />
+            <RadzenDataGridColumn TItem="DTask" Property="Description" Title="Description" Width="200px" />
+            <RadzenDataGridColumn TItem="DTask" Property="DueDate" Title="DueDate" Width="120px">
+                <Template Context="context">
+                    @String.Format("{0:dd/MM/yyyy}", context.DueDate)
+                </Template>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DTask" Title="Status" Width="120px">
                 <Template Context="context">
                     @if (context.TaskStatus == DTaskStatus.Active)
@@ -38,12 +67,24 @@ else
                     }
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DTask" Title="Assigned To">
+            <RadzenDataGridColumn TItem="DTask" Title="DueDate Status" Width="120px">
+                <Template Context="context">
+                    @if (context.DueDate < DateTime.Today)
+                    {
+                        <span class="tag red-tag">Expired</span>
+                    }
+                    else
+                    {
+                        <span class="tag green-tag">Active</span>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="DTask" Title="Assigned To" Width="120px">
                 <Template Context="context">
                     <span>@context.User.Email</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DTask" Title="Action" Width="120px">
+            <RadzenDataGridColumn TItem="DTask" Title="Action" Width="100px">
                 <Template Context="context">
                     <a href="task/edit/@context.Id">
                         <span class="oi oi-pencil" aria-hidden="true"></span>
@@ -60,7 +101,7 @@ else
     private List<DTask> tasks = new();
     private async Task Delete(DTask task)
     {
-        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure????");
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure to delete the Task????");
         if (confirmed)
         {
             if (await taskService.DeleteTaskAsync(task.Id))

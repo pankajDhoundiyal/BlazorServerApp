@@ -1,11 +1,16 @@
 ﻿@page "/user/add"
 @page "/user/edit/{userId:int}"
+@using BlazorServeCrud.Enum
 @using BlazorServeCrud.Models;
 @using Services
 @inject IUserService userService
 @inject NavigationManager _nav
 <h3>@Title</h3>
 
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
 <RadzenTemplateForm Data="@user" Submit="@((User args) => { Submit(args); })">
     <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
         <RadzenColumn Size="12" SizeMD="6">
@@ -40,15 +45,18 @@
                                 <RadzenEmailValidator Component="Email" Text="Provide a valid email address" Popup=@popup Style="position: absolute" />
                             </RadzenColumn>
                         </RadzenRow>
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="12" SizeMD="4">
-                                <RadzenLabel Text="Password" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="8">
-                                <RadzenTextBox style="display: block" Name="Password" @bind-Value=@user.Password class="w-100" />
-                                <RadzenRequiredValidator Component="Password" Text="Password is required" Popup=@popup Style="position: absolute" />
-                            </RadzenColumn>
-                        </RadzenRow>
+                        @if (UserId == 0)
+                        {
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="4">
+                                    <RadzenLabel Text="Password" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="8">
+                                    <RadzenTextBox style="display: block" Name="Password" type="password" @bind-Value=@user.Password class="w-100" />
+                                    <RadzenRequiredValidator Component="Password" Text="Password is required" Popup=@popup Style="position: absolute" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        }
                         <RadzenRow AlignItems="AlignItems.Center">
                             <RadzenColumn Size="12" SizeMD="4">
                                 <RadzenLabel Text="Address" />
@@ -71,6 +79,35 @@
                 </RadzenFieldset>
             </RadzenStack>
         </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="User Detail">
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Role" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenDropDown TValue="int" @bind-Value=@user.RoleId Data="roles" TextProperty="Text" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
+                                @* <RadzenRequiredValidator Component="PhoneNo" Text="PhoneNo is required" Popup=@popup Style="position: absolute" /> *@
+                            </RadzenColumn>
+                        </RadzenRow>
+                        @if (user.RoleId == 3)
+                        {
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="12" SizeMD="4">
+                                    <RadzenLabel Text="Expert in Category" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="8">
+                                    <RadzenDropDown TValue="int" @bind-Value=@user.ExpertCategoryId Data="expertCategory" TextProperty="Text" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
+                                    @* <RadzenRequiredValidator Component="PhoneNo" Text="PhoneNo is required" Popup=@popup Style="position: absolute" /> *@
+                                </RadzenColumn>
+                            </RadzenRow>
+                        }
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenStack>
+        </RadzenColumn>
     </RadzenRow>
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
         <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
@@ -79,16 +116,21 @@
 </RadzenTemplateForm>
 
 @code {
+    private bool loader;
     private string Title = "Add User";
     bool popup;
     [Parameter]
     public int UserId { get; set; }
     private User user = new();
+    List<EnumModel> roles = new();
+    List<EnumModel> expertCategory = new();
     async Task Submit(User arg)
     {
+        loader = true;
         var result = await userService.RegisterUserAsync(arg);
         if (result)
         {
+            loader = false;
             _nav.NavigateTo("admin/users");
         }
     }
@@ -104,5 +146,21 @@
             Title = "Update User";
             user = await userService.FindByIdAsync(UserId);
         }
+        // var role = Enum.GetNames(typeof(UserRole)).ToList();
+        // foreach (var r in role)
+        // {
+        //     RoleList rl = new();
+        //     rl.Text = r;
+        //     rl.Id = 3;
+        //     roles.Add(rl);
+        // }
+        roles = ((Role[])Enum.GetValues(typeof(Role))).Select(c => new EnumModel() { Id = (int)c, Text = c.ToString() }).ToList();
+        roles.RemoveAt(0);
+        expertCategory = ((ExpertCategory[])Enum.GetValues(typeof(ExpertCategory))).Select(c => new EnumModel() { Id = (int)c, Text = c.ToString() }).ToList();
+    }
+    class EnumModel
+    {
+        public string? Text { get; set; }
+        public int Id { get; set; }
     }
 }

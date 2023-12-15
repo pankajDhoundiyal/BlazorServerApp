@@ -14,14 +14,21 @@ namespace BlazorServeCrud.Models
         [Required]
         public string? Tasks { get; set; }
         public string? Description { get; set; }
+        public DateTime? DueDate { get; set; } = DateTime.Today;
         public DTaskStatus TaskStatus { get; set; }
         [ForeignKey("User")]
         public int UserId { get; set; }
         [NotMapped]
         public int TaskStatusId { get; set; }
+        public string Remarks { get; set; }
         [NotMapped]
         public string Comment { get; set; }
-        public User User { get; set; }
+        public bool IsAgreeWithDueDate { get; set; } = true;
+        public string Reason { get; set; }
+        public bool IsExpertHelpRequired { get; set; }
+        [InverseProperty("User")]
+        public int ExpertId { get; set; }
+        public virtual User User { get; set; }
         public ICollection<TaskComment> TaskComment { get; set; }
     }
 }

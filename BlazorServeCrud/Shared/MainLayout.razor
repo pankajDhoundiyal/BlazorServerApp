@@ -1,9 +1,11 @@
 ﻿@inherits LayoutComponentBase
 @using Blazored.SessionStorage
+@using Blazored.Toast.Configuration
 @inject NavigationManager nav
 @inject ISessionStorageService sessionStorage
 <PageTitle>BlazorServeCrud</PageTitle>
 
+@* <Toast /> *@
 <div class="page">
     <div class="sidebar">
         <NavMenu UserEmail="@userName" />
@@ -11,7 +13,7 @@
 
     <main>
         <div class="top-row px-4">
-            <span>Welcome to  &nbsp;</span> <span style="color:brown; font-size:16px;"> @userName</span>
+            <span>Welcome  &nbsp;</span> <span style="color:brown; font-size:16px;"> @userNameH</span>
             &nbsp;
             <a href="#" @onclick="Logout">Logout</a>
         </div>
@@ -21,8 +23,10 @@
         </article>
     </main>
 </div>
+<BlazoredToasts />
 @code {
     private string userName= string.Empty;
+    private string userNameH = string.Empty;
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
@@ -35,6 +39,7 @@
         if (firstRender)
         {
             userName = await sessionStorage.GetItemAsStringAsync("UserName");
+            userNameH = await sessionStorage.GetItemAsStringAsync("UserNameH");
 
             StateHasChanged();
         }
