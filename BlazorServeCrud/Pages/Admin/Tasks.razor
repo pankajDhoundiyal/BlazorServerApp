@@ -4,6 +4,7 @@
 @using BlazorServeCrud.Enum
 @inject ITaskService taskService
 @inject IJSRuntime jsRuntime
+@inject IToastService toastService
 <h3>Tasks</h3>
 <a href="/task/add" class="btn btn-outline-dark my-2">Add Task</a>
 <style>
@@ -37,7 +38,7 @@
 else
 {
     <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced"
-                AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
+                AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
                 ShowPagingSummary="true" Data="@tasks" TItem="DTask" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
             <RadzenDataGridColumn TItem="DTask" Property="Tasks" Title="Task" Frozen="true" Width="160px" />
@@ -106,6 +107,7 @@ else
         {
             if (await taskService.DeleteTaskAsync(task.Id))
             {
+                toastService.ShowToast(ToastLevel.Success, "Task Deleted Successfully");
                 tasks = await taskService.GetAllTaskAsync();
             }
         }

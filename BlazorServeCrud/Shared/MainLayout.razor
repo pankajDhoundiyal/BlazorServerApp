@@ -3,36 +3,53 @@
 @using Blazored.Toast.Configuration
 @inject NavigationManager nav
 @inject ISessionStorageService sessionStorage
+@using BlazorServeCrud.AuthProviders
+@inject AuthenticationStateProvider _stateProvider;
 <PageTitle>BlazorServeCrud</PageTitle>
 
-@* <Toast /> *@
-<div class="page">
-    <div class="sidebar">
-        <NavMenu UserEmail="@userName" />
-    </div>
+<BlazoredToasts Position="ToastPosition.TopRight"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                ShowProgressBar="true"
+                RemoveToastsOnNavigation="true"
+                Timeout="3" />
+<AuthorizeView>
+    <Authorized>
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu UserEmail="@userName" />
+            </div>
 
-    <main>
-        <div class="top-row px-4">
-            <span>Welcome  &nbsp;</span> <span style="color:brown; font-size:16px;"> @userNameH</span>
-            &nbsp;
-            <a href="#" @onclick="Logout">Logout</a>
+            <main>
+                <div class="top-row px-4">
+                    <span>Welcome  &nbsp;</span> <span style="color:brown; font-size:16px;"> @userNameH</span>
+                    &nbsp;
+                    <a href="#" @onclick="Logout">Logout</a>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
         </div>
+    </Authorized>
+</AuthorizeView>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-<BlazoredToasts />
+
 @code {
     private string userName= string.Empty;
     private string userNameH = string.Empty;
+    [CascadingParameter] protected Task<AuthenticationState> AuthStat { get; set; }
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
         // Get the session value for "UserName"
         //var result = await ProtectedSessionStore.GetAsync<string>("UserName");
-        
+        var user = (await AuthStat).User;
+        if (!user.Identity.IsAuthenticated)
+        {
+            nav.NavigateTo($"login");
+        }
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -48,6 +65,7 @@
     {
         //userName = null;
         await sessionStorage.RemoveItemAsync("UserName");
+        ((TestAuthStateProvider)_stateProvider).MarkUserAsLoggedOut();
         nav.NavigateTo("/");
     }
 }

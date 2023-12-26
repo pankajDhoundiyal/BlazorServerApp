@@ -1,0 +1,55 @@
+﻿@page "/admin/manage-category"
+@using BlazorServeCrud.Models;
+@using Services
+@inject NavigationManager _nav
+@inject ICategoryService _categoryService
+@inject IJSRuntime jsRuntime
+@inject IToastService toastService
+<h3>Expert Category List</h3>
+<a href="/admin/add-category" class="btn btn-outline-dark my-2">Add Category</a>
+@if (categories is null)
+{
+    <p><em>Loading... !</em></p>
+}
+else
+{
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced"
+                    AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
+                    ShowPagingSummary="true" Data="@categories" TItem="Categories" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="Categories" Property="CategoryName" Title="Category Name" Frozen="true" Width="160px" />
+            <RadzenDataGridColumn TItem="Categories" Property="Description" Title="Category Description" Width="200px" />
+            <RadzenDataGridColumn TItem="Categories" Title="Action" Width="100px">
+                <Template Context="context">
+                    <a href="admin/edit-category/@context.Id">
+                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                    </a>
+                    <a @onclick="() => Delete(context)">
+                        <span class="oi oi-trash" aria-hidden="true"></span>
+                    </a>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+@code {
+    private List<Categories> categories = new();
+    private async Task Delete(Categories task)
+    {
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure to delete the Category????");
+        if (confirmed)
+        {
+            if (await _categoryService.DeleteCategoryAsync(task.Id))
+            {
+                toastService.ShowToast(ToastLevel.Success, "Category Deleted Successfully");
+                categories = await _categoryService.GetAllCategoryAsync();
+            }
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await _categoryService.GetAllCategoryAsync();
+        //base.OnInitializedAsync();
+    }
+
+}

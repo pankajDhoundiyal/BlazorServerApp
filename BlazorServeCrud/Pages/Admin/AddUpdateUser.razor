@@ -4,7 +4,9 @@
 @using BlazorServeCrud.Models;
 @using Services
 @inject IUserService userService
+@inject ICategoryService categoryService
 @inject NavigationManager _nav
+@inject IToastService toastService
 <h3>@Title</h3>
 
 @if (loader == true)
@@ -99,7 +101,7 @@
                                     <RadzenLabel Text="Expert in Category" />
                                 </RadzenColumn>
                                 <RadzenColumn Size="12" SizeMD="8">
-                                    <RadzenDropDown TValue="int" @bind-Value=@user.ExpertCategoryId Data="expertCategory" TextProperty="Text" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
+                                    <RadzenDropDown TValue="int" @bind-Value=@user.ExpertCategoryId Data="expertCategory" TextProperty="CategoryName" ValueProperty="Id" Style="width: 100%; max-width: 400px;" />
                                     @* <RadzenRequiredValidator Component="PhoneNo" Text="PhoneNo is required" Popup=@popup Style="position: absolute" /> *@
                                 </RadzenColumn>
                             </RadzenRow>
@@ -123,16 +125,28 @@
     public int UserId { get; set; }
     private User user = new();
     List<EnumModel> roles = new();
-    List<EnumModel> expertCategory = new();
+    List<Categories> expertCategory = new();
     async Task Submit(User arg)
     {
         loader = true;
         var result = await userService.RegisterUserAsync(arg);
         if (result)
         {
+            var msg = "Used Added Successfully";
+            if (arg.Id > 0)
+            {
+                msg = "User Updated Successfully";
+            }
+            toastService.ShowToast(ToastLevel.Success, msg);
             loader = false;
             _nav.NavigateTo("admin/users");
+        }else
+        {
+            loader = false;
+            toastService.ShowToast(ToastLevel.Error, "Failed to Add User");
+
         }
+        StateHasChanged();
     }
 
     void Cancel()
@@ -156,7 +170,7 @@
         // }
         roles = ((Role[])Enum.GetValues(typeof(Role))).Select(c => new EnumModel() { Id = (int)c, Text = c.ToString() }).ToList();
         roles.RemoveAt(0);
-        expertCategory = ((ExpertCategory[])Enum.GetValues(typeof(ExpertCategory))).Select(c => new EnumModel() { Id = (int)c, Text = c.ToString() }).ToList();
+        expertCategory = await categoryService.GetAllCategoryAsync();
     }
     class EnumModel
     {

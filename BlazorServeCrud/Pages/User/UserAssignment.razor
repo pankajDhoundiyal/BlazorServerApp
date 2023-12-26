@@ -6,6 +6,7 @@
 @inject ITaskService taskService;
 @inject ISessionStorageService sessionStorage
 <h3>UserAssignment</h3>
+@attribute [Authorize]
 <style>
     .tag {
         width: auto;
@@ -43,7 +44,7 @@
 else
 {
     <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced"
-                AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
+                AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
                 ShowPagingSummary="true" Data="@tasks" TItem="DTask" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
             <RadzenDataGridColumn TItem="DTask" Property="Tasks" Title="Task" Frozen="true" Width="160px" />

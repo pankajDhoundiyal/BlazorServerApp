@@ -28,7 +28,9 @@ namespace BlazorServeCrud.Services
                     return null;
                 }
                 var data = await _ctx.User.FirstOrDefaultAsync(_=>_.Email== user.Email && _.Password==user.Password);
-                if (data != null) { return data; }
+                if (data != null) {                    
+                    return data; 
+                }
                 else return null;
             }
 			catch (Exception ex)
@@ -67,9 +69,9 @@ namespace BlazorServeCrud.Services
                 body.AppendFormat("<br />");
                 body.AppendFormat("<p>Thank you for registering with us!</p>");
                 body.AppendFormat("<p>Please find the details below to login </p>");
-                body.AppendFormat("UserName {0}", user.Email);
+                body.AppendFormat("UserName - {0}", user.Email);
                 body.AppendFormat("<br />");
-                body.AppendFormat("Password {0}", user.Password);
+                body.AppendFormat("Password - {0}", user.Password);
                 body.AppendFormat("<br />");
                 body.AppendFormat("<br />");
                 body.AppendFormat("<a href="+baseUrl+"> Click here to Login</a>");
@@ -104,7 +106,7 @@ namespace BlazorServeCrud.Services
         {
             try
             {
-                var data = await _ctx.User.Where(_=>_.Role != Role.Admin).ToListAsync();
+                var data = await _ctx.User.Where(_=>_.Role != Role.Admin).OrderByDescending(m => m.Id).ToListAsync();
                 return data;
             }
             catch (Exception ex)
@@ -117,6 +119,13 @@ namespace BlazorServeCrud.Services
             try
             {
                 var data = await _ctx.User.Where(_ => _.Role != Role.Admin && _.Role != Role.User).ToListAsync();
+                foreach (var item in data)
+                {
+                    var res = await _ctx.Categories.FindAsync(item.ExpertCategoryId);
+                    if (res != null)
+                        item.ExpertFulllName = string.Format("{0} {1} {2}", item.FirstName, item.LastName + " - ", res.CategoryName);
+                }
+                
                 return data;
             }
             catch (Exception ex)

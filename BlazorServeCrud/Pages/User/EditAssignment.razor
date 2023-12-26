@@ -6,6 +6,7 @@
 @inject IUserService userService;
 @inject ITaskService taskService;
 @inject NavigationManager _nav
+@inject IToastService toastService
 <h3>@Title</h3>
 
 @if (loader == true)
@@ -170,8 +171,15 @@
         if (result)
         {
             loader = false;
+            toastService.ShowToast(ToastLevel.Success, "Task updated successfully");
             _nav.NavigateTo("usertask");
         }
+        else
+        {
+            loader = false;
+            toastService.ShowToast(ToastLevel.Error, "Failed to update Task");
+        }
+        StateHasChanged();
     }
     void Cancel()
     {

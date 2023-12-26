@@ -3,6 +3,7 @@
 @inject IJSRuntime jsRuntime
 @inject IUserService userService
 @using BlazorServeCrud.Models;
+@inject IToastService toastService
 <h3>Users</h3>
 <a href="/user/add" class="btn btn-outline-dark my-2">Add User</a>
 
@@ -13,12 +14,12 @@
 else
 {
     <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced"
-                AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
+                AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left"
                 ShowPagingSummary="true" Data="@users" TItem="User" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
             <RadzenDataGridColumn TItem="User" Property="FirstName" Title="First Name" Frozen="true" Width="160px" />
-            <RadzenDataGridColumn TItem="User" Property="LastName" Title="Last Name" Width="160px" />
-            <RadzenDataGridColumn TItem="User" Property="Email" Title="Email" Width="200px" />
+            <RadzenDataGridColumn TItem="User" Property="LastName" Title="Last Name" Width="140px" />
+            <RadzenDataGridColumn TItem="User" Property="Email" Title="Email" Width="160px" />
             <RadzenDataGridColumn TItem="User" Property="Address" Title="Address" Width="120px" />
             <RadzenDataGridColumn TItem="User" Property="PhoneNo" Title="PhoneNo" Width="160px" />
             <RadzenDataGridColumn TItem="User" Property="Role" Title="Role" Width="120px" />
@@ -51,6 +52,7 @@ else
         {
             if (await userService.DeleteAsync(user.Id))
             {
+                toastService.ShowToast(ToastLevel.Success, "User Deleted Successfully");
                 users = await userService.GetAllAsync();
             }
         }

@@ -26,8 +26,9 @@ namespace BlazorServeCrud.Models
         public int RoleId { get; set; }
         public int ExpertCategoryId { get; set; }
         [NotMapped]
-        public string ExpertFulllName => $"{FirstName} {LastName} - {(ExpertCategory)ExpertCategoryId}";
+        public string ExpertFulllName { get; set; }
         public ICollection<DTask> Task { get; } = new List<DTask>();
+        //public virtual Categories Categories { get; set; } = new Categories();
     }
     public class LoginUser
     {

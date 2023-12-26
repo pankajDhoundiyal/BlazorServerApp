@@ -1,5 +1,5 @@
 ﻿@using BlazorServeCrud.Services 
-@inject BlazorServeCrud.Services.ToastService ToastService
+@* @inject BlazorServeCrud.Services.ToastService ToastService *@
 @implements IDisposable
 
 <div class="cs-toast @(_isVisible ? "cs-toast-visible" : null) @_backgroundCssClass">
@@ -70,7 +70,7 @@
     protected override void OnInitialized()
     {
         //ToastService.OnShow += ShowToast;
-        ToastService.OnHide += HideToast;
+        //ToastService.OnHide += HideToast;
     }
 
     private void ShowToast(string message, ToastLevel level)
@@ -116,6 +116,6 @@
     void IDisposable.Dispose()
     {
         //ToastService.OnShow -= ShowToast;
-        ToastService.OnHide -= HideToast;
+        //ToastService.OnHide -= HideToast;
     }
 }

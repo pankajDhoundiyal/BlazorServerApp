@@ -12,5 +12,6 @@ namespace BlazorServeCrud.Models
         public DbSet<User> User { get; set; }
         public DbSet<DTask> Task { get; set; }
         public DbSet<TaskComment> TaskComment { get; set; }
+        public DbSet<Categories> Categories { get; set; }
     }
 }

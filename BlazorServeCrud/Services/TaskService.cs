@@ -31,6 +31,7 @@ namespace BlazorServeCrud.Services
                 {
                     task.TaskStatus = DTaskStatus.Active;
                     task.Remarks = task.Remarks == null ? "" : task.Remarks;
+                    task.Reason = task.Reason == null ? "" : task.Reason;
                     _ctx.Task.Add(task);
                 }
                 _ctx.SaveChanges();
@@ -41,7 +42,9 @@ namespace BlazorServeCrud.Services
                 body.AppendFormat("<h1>Task Assignment</h1>");
                 body.AppendFormat("Dear {0},", user.FirstName + " " + user.LastName);
                 body.AppendFormat("<br />");
-                body.AppendFormat("<p>You have been assigned a Task, please click on the below link to login to portal to view the Task Details!</p>");
+                body.AppendFormat("<p>You have been assigned a Task by the Admin, please click on the below link to login to portal to view the Task Details!</p>");
+                body.AppendFormat("TaskName - {0}", task.Tasks);
+                body.AppendFormat("<br />");
                 body.AppendFormat("<br />");
                 body.AppendFormat("<a href=" + baseUrl + "> Click here to Login</a>");
                 body.AppendFormat("<br />");
@@ -61,6 +64,7 @@ namespace BlazorServeCrud.Services
         public async Task<bool> AddUpdateUserTaskAsync(DTask task)
         {
             bool sendEmailtoExpert = false;
+            bool sendEmailtoAdmin = false;
             try
             {
                 if (task.Id > 0)
@@ -69,6 +73,10 @@ namespace BlazorServeCrud.Services
                     if (task.IsExpertHelpRequired)
                     {
                         sendEmailtoExpert = true;
+                    }
+                    if (!task.IsAgreeWithDueDate)
+                    {
+                        sendEmailtoAdmin = true;
                     }
                     if (!task.IsExpertHelpRequired)
                     {
@@ -94,6 +102,56 @@ namespace BlazorServeCrud.Services
                     _ctx.Task.Add(task);
                 }
                 _ctx.SaveChanges();
+                if(sendEmailtoExpert)
+                {
+                    // send email to expert
+                    var usr = await _ctx.User.Where(m => m.Id == task.ExpertId).FirstOrDefaultAsync();
+                    var tsk = await _ctx.User.Where(m => m.Id == task.UserId).FirstOrDefaultAsync();
+                    List<string> emails = new List<string>();
+                    emails.Add(usr.Email);
+                    string baseUrl = configuration.GetValue<string>("BaseUrl");
+                    StringBuilder body = new StringBuilder();
+                    body.AppendFormat("<h1>Assistance Required on Task</h1>");
+                    body.AppendFormat("Dear {0},", usr.FirstName + " " + usr.LastName);
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<p>You have been requested by the user '"+ tsk.Email+"' to help him on the Task Assigned by the Admin, please click on the below link to login to portal to view the Task Details!</p>");
+                    body.AppendFormat("TaskName - {0}", task.Tasks);
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<a href=" + baseUrl + "> Click here to Login</a>");
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("Warm Regards,");
+                    body.AppendFormat("<br />");
+                    //body.AppendFormat("Admin");
+                    // send email
+                    await SendEmail("Assistance Required on Task", body, emails, null, null);
+                }
+                if (sendEmailtoAdmin)
+                {
+                    // send email to Admin
+                    var usr = await _ctx.User.Where(m => m.Role == Role.Admin).FirstOrDefaultAsync();
+                    List<string> emails = new List<string>();
+                    emails.Add(usr.Email);
+                    string baseUrl = configuration.GetValue<string>("BaseUrl");
+                    StringBuilder body = new StringBuilder();
+                    body.AppendFormat("<h1>DueDate change Request</h1>");
+                    body.AppendFormat("Dear {0},", usr.FirstName + " " + usr.LastName);
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<p>You have been requested to change the Task Duedate, please click on the below link to login to portal to view the Task Details!</p>");
+                    body.AppendFormat("TaskName - {0}", task.Tasks);
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("Reason mentioned - {0}", task.Reason);
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<a href=" + baseUrl + "> Click here to Login</a>");
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("<br />");
+                    body.AppendFormat("Warm Regards,");
+                    body.AppendFormat("<br />");
+                    // send email
+                    await SendEmail("DueDate change Request", body, emails, null, null);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -105,8 +163,8 @@ namespace BlazorServeCrud.Services
         {
             try
             {
-                List<DTask> tasks = await _ctx.Task.
-                                     Include(m => m.User).ToListAsync();
+                List<DTask> tasks = await _ctx.Task.OrderByDescending(m => m.Id)
+                                     .Include(m => m.User).ToListAsync();
                 return tasks;
             }
             catch (Exception ex)
@@ -126,7 +184,7 @@ namespace BlazorServeCrud.Services
             var user = await _ctx.User.FirstOrDefaultAsync(_ => _.Email == username);
             if (user != null)
             {
-                return await _ctx.Task.Where(_ => _.UserId == user.Id).ToListAsync();
+                return await _ctx.Task.Where(_ => _.UserId == user.Id).OrderByDescending(m => m.Id).ToListAsync();
             }
             else
                 return null;

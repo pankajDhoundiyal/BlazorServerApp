@@ -1,0 +1,92 @@
+﻿@page "/admin/add-category"
+@page "/admin/edit-category/{id:int}"
+@using BlazorServeCrud.Models
+@using Services
+@inject NavigationManager _nav
+@inject ICategoryService _categoryService
+@inject NavigationManager _nav
+@inject IToastService toastService
+<h3>@Title</h3>
+
+@if (loader == true)
+{
+    <div class="spinner"></div>
+}
+<RadzenTemplateForm Data="@categories" Submit="@((Categories args) => { Submit(args); })">
+    <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack>
+                <RadzenFieldset Text="Category Detail">
+                    <RadzenStack Gap="1rem">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Category Name" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="CategoryName" @bind-Value=@categories.CategoryName class="w-100" />
+                                <RadzenRequiredValidator Component="CategoryName" Text="Category name is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Description" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="8">
+                                <RadzenTextBox style="display: block" Name="Description" @bind-Value=@categories.Description class="w-100" />
+                                <RadzenRequiredValidator Component="Description" Text="Description is required" Popup=@popup Style="position: absolute" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+    </RadzenStack>
+</RadzenTemplateForm>
+@code {
+    private bool loader;
+    private string Title = "Add Expert Category";
+    bool popup;
+    [Parameter]
+    public int Id { get; set; }
+    private Categories categories = new();
+    async Task Submit(Categories arg)
+    {
+        loader = true;
+        var result = await _categoryService.AddUpdateCategoryAsync(arg);
+        if (result)
+        {
+            var msg = "Category Added Successfully";
+            if (arg.Id > 0)
+            {
+                msg = "Category Updated Successfully";
+            }
+            loader = false;
+            toastService.ShowToast(ToastLevel.Success, msg);
+            _nav.NavigateTo("admin/manage-category");
+        }
+        else
+        {
+            loader = false;
+            toastService.ShowToast(ToastLevel.Error, "Failed to add Category");
+        }
+        StateHasChanged();
+    }
+
+    void Cancel()
+    {
+        _nav.NavigateTo("admin/manage-category");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            Title = "Edit Expert Category";
+            // get the category data
+            categories = await _categoryService.GetAllCategoryByIdAsync(Id);
+        }
+    }
+}
